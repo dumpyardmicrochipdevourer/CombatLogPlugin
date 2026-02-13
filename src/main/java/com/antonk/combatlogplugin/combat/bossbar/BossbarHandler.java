@@ -55,7 +55,7 @@ public class BossbarHandler {
                 bossBar.setTitle("Combat: " + countdown + "s");
                 bossBar.setProgress(countdown / (double) seconds);
 
-                if (countdown <= 30) {
+                if (countdown <= countdown/2) {
                     bossBar.setColor(BarColor.YELLOW);
                 } else if (countdown <= 10) {
                     bossBar.setColor(BarColor.GREEN);
