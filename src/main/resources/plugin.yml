@@ -1,0 +1,4 @@
+name: CombatLogPlugin
+version: '1.0-SNAPSHOT'
+main: com.antonk.combatlogplugin.CombatLogPlugin
+api-version: '1.21'
