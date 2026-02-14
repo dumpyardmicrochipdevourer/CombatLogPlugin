@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BossbarHandler {
-    private Plugin plugin;
+    private final Plugin plugin;
     private int countdown;
     private final Map<Player, BossBar> activeBossBars = new HashMap<>();
     private final Map<Player,BukkitTask> activeTasks = new HashMap<>();
@@ -71,7 +71,7 @@ public class BossbarHandler {
         this.countdown = countdown;
     }
 
-    private void resetTimer(Player p) {
+    public void resetTimer(Player p) {
         BukkitTask task = activeTasks.get(p);
         if (task != null) {
             task.cancel();
@@ -81,8 +81,12 @@ public class BossbarHandler {
 
     public void removeCombatLog(Player p) {
         BossBar bossBar = activeBossBars.remove(p);
-        bossBar.removeAll();
+        if (bossBar != null) {
+            bossBar.removeAll();
+        }
         BukkitTask task = activeTasks.remove(p);
-        task.cancel();
+        if (task != null) {
+            task.cancel();
+        }
     }
 }

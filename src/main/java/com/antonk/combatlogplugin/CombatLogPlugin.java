@@ -1,6 +1,7 @@
 package com.antonk.combatlogplugin;
 
 import com.antonk.combatlogplugin.combat.CombatManager;
+import com.antonk.combatlogplugin.commands.CommandManager;
 import com.antonk.combatlogplugin.listeners.PvpListener;
 import com.antonk.combatlogplugin.listeners.punishers.ExitListener;
 import com.antonk.combatlogplugin.listeners.punishers.PreCommandListener;
@@ -21,6 +22,7 @@ public final class CombatLogPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(
                 new PreCommandListener(combatManager),this
         );
+        new CommandManager(this,combatManager).registerAll();
         getLogger().info("CombatLogPlugin successfully started!");
     }
 

@@ -17,9 +17,9 @@ public class CombatManager {
         barHandler = new BossbarHandler(plugin,countdown);
     }
 
-    public void createDuel(Player attacker, Player victim) {
+    public boolean createDuel(Player attacker, Player victim) {
         if (isInCreative(attacker)) {
-            return;
+            return false;
         }
         Duel existingDuel = activeDuels.get(attacker);
         if (existingDuel == null) {
@@ -28,8 +28,17 @@ public class CombatManager {
         if (existingDuel != null) {
             barHandler.putCombatLog(attacker);
             barHandler.putCombatLog(victim);
+            return true;
         }
+        putCombatLog(attacker,victim);
+        return true;
+    }
 
+    public void putCombatLog(Player attacker, Player victim) {
+        if (activeDuels.containsKey(attacker) || activeDuels.containsKey(victim)) {
+            barHandler.putCombatLog(attacker);
+            barHandler.putCombatLog(victim);
+        }
         Duel duel = new Duel(attacker,victim);
         activeDuels.put(attacker, duel);
         activeDuels.put(victim,duel);
@@ -73,6 +82,14 @@ public class CombatManager {
 
     public boolean isInCombat(Player player) {
         return activeDuels.containsKey(player);
+    }
+
+    public void removeCombatLog(Player p) {
+        Duel duel = getActiveDuels().get(p);
+        if (duel != null) {
+            endDuel(duel);
+        }
+        barHandler.removeCombatLog(p);
     }
 
     private void announceWinner(Player winner, Player loser) {
