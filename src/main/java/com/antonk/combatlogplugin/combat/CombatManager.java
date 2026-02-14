@@ -1,6 +1,7 @@
 package com.antonk.combatlogplugin.combat;
 
 import com.antonk.combatlogplugin.combat.bossbar.BossbarHandler;
+import org.bukkit.GameMode;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -17,6 +18,9 @@ public class CombatManager {
     }
 
     public void createDuel(Player attacker, Player victim) {
+        if (isInCreative(attacker)) {
+            return;
+        }
         Duel existingDuel = activeDuels.get(attacker);
         if (existingDuel == null) {
             existingDuel = activeDuels.get(victim);
@@ -89,5 +93,9 @@ public class CombatManager {
 
         barHandler.removeCombatLog(duel.getPlayer1());
         barHandler.removeCombatLog(duel.getPlayer2());
+    }
+
+    private boolean isInCreative(Player p) {
+        return p.getGameMode().equals(GameMode.CREATIVE);
     }
 }
