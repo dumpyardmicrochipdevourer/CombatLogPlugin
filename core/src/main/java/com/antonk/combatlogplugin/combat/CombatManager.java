@@ -92,6 +92,10 @@ public class CombatManager {
         barHandler.removeCombatLog(p);
     }
 
+    public void setCountdown(int countdown) {
+        barHandler.setCountdown(countdown);
+    }
+
     private void announceWinner(Player winner, Player loser) {
         winner.sendMessage(String.format("Ты победил игрока %s", loser.getName()));
         winner.getWorld().spawnParticle(
