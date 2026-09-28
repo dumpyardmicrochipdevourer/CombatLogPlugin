@@ -6,3 +6,4 @@ out/
 target/
 build/
 *.log
+dependency-reduced-pom.xml

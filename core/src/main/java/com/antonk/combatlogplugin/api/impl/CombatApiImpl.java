@@ -23,8 +23,8 @@ public class CombatApiImpl implements CombatApi {
         combatManager.removeCombatLog(player);
     }
     public Player getOpponent(Player player) {
-        Duel duel =combatManager.getDuel(player);
-        return duel.getOpponent(player);
+        Duel duel = combatManager.getDuel(player);
+        return duel == null ? null : duel.getOpponent(player);
     }
 
     @Override

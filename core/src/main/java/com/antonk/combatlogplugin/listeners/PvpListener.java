@@ -1,14 +1,14 @@
 package com.antonk.combatlogplugin.listeners;
 
-import com.antonk.combatlogplugin.combat.CombatManager;
 import org.bukkit.entity.AbstractArrow;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
+
+import com.antonk.combatlogplugin.combat.CombatManager;
 
 public class PvpListener implements Listener {
     private final CombatManager combatManager;
@@ -17,36 +17,32 @@ public class PvpListener implements Listener {
         this.combatManager = combatManager;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onHit(EntityDamageByEntityEvent event) {
-        if (!(event.getDamager() instanceof Player victim)) {
+        if (!(event.getEntity() instanceof Player victim)) {
             return;
         }
-        if(!(event.getEntity() instanceof Player attacker)) {
+        Player attacker = resolveAttacker(event.getDamager());
+        if (attacker == null || attacker.equals(victim)) {
             return;
         }
-        combatManager.createDuel(attacker,victim);
-    }
-
-    @EventHandler
-    public void onProjectileHit(ProjectileHitEvent event) {
-        Projectile proj = event.getEntity();
-        if (!(event.getHitEntity() instanceof Player victim)) {
-            return;
-        }
-        if (!(proj.getShooter() instanceof Player attacker)) {
-            return;
-        }
-        if (!(event.getEntity() instanceof AbstractArrow arrow)) {
-            return;
-        }
-        combatManager.createDuel(attacker,victim);
+        combatManager.createDuel(attacker, victim);
     }
 
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
         Player victim = event.getEntity();
         Player killer = victim.getKiller();
-        combatManager.onPlayerDeath(killer,victim);
+        combatManager.onPlayerDeath(killer, victim);
+    }
+
+    private Player resolveAttacker(Entity damager) {
+        if (damager instanceof Player player) {
+            return player;
+        }
+        if (damager instanceof AbstractArrow arrow && arrow.getShooter() instanceof Player shooter) {
+            return shooter;
+        }
+        return null;
     }
 }
