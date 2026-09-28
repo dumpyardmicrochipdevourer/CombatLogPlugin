@@ -4,8 +4,8 @@ main: com.antonk.combatlogplugin.CombatLogPlugin
 api-version: '1.21'
 permissions:
   combatlog.admin:
-    description: Управление боем /combatlog
+    description: Manage combat with /combatlog
     default: op
   combatlog.bypass:
-    description: Команды в бою не блокируются
+    description: Commands are not blocked in combat
     default: op

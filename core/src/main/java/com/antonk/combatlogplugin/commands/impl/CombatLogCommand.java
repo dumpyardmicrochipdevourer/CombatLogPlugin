@@ -34,7 +34,7 @@ public class CombatLogCommand {
                             if (source.getExecutor() instanceof Player player) {
                                 combatManager.putCombatLog(player, player);
                             } else {
-                                source.getSender().sendPlainMessage("Эту команду может выполнить только игрок!");
+                                source.getSender().sendPlainMessage("Only players can run this command!");
                             } return 1;
                         }))
                 .then(literal("put")
@@ -48,7 +48,7 @@ public class CombatLogCommand {
                                     if (success) {
                                         ctx.getSource().getSender().sendPlainMessage("CombatLogged " + target.getName());
                                     } else {
-                                        ctx.getSource().getSender().sendPlainMessage(String.format("Ошибка! %s в креативе",target.getName()));
+                                        ctx.getSource().getSender().sendPlainMessage(String.format("Error! %s is in creative mode",target.getName()));
                                     }
                                     return success ? 1 : 0;
                                 })
@@ -62,9 +62,9 @@ public class CombatLogCommand {
                                     }
                                     if (combatManager.isInCombat(target)) {
                                         combatManager.removeCombatLog(target);
-                                        ctx.getSource().getSender().sendPlainMessage("CombatLog снят с " + target.getName());
+                                        ctx.getSource().getSender().sendPlainMessage("Combat removed from " + target.getName());
                                     } else {
-                                        ctx.getSource().getSender().sendPlainMessage("Игрок не в CombatLog'е!");
+                                        ctx.getSource().getSender().sendPlainMessage("Player is not in combat!");
                                     } return 1;
                                 })
                         ));
@@ -75,7 +75,7 @@ public class CombatLogCommand {
         List<Player> players = ctx.getArgument("player", PlayerSelectorArgumentResolver.class)
                 .resolve(ctx.getSource());
         if (players.isEmpty()) {
-            ctx.getSource().getSender().sendPlainMessage("Игрок не найден!");
+            ctx.getSource().getSender().sendPlainMessage("Player not found!");
             return null;
         }
         return players.getFirst();

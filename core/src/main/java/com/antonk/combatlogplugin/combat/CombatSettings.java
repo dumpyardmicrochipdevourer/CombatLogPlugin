@@ -23,9 +23,9 @@ public record CombatSettings(
         return new CombatSettings(
                 Math.max(1, config.getInt("countdown", 60)),
                 config.getString("messages.bossbar-title", "CombatLog: {time}s"),
-                config.getString("messages.win", "Ты убил игрока {player}"),
-                config.getString("messages.lose", "Тебя убил игрок {player}"),
-                config.getString("messages.command-blocked", "Нельзя использовать команды во время CombatLog!"),
+                config.getString("messages.win", "You killed {player}"),
+                config.getString("messages.lose", "You were killed by {player}"),
+                config.getString("messages.command-blocked", "You cannot use commands during combat!"),
                 allowed
         );
     }
