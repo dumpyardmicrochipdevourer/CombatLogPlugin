@@ -1,0 +1,11 @@
+# duel duration
+countdown: 60
+
+# allowed commmands in duel (without /)
+allowed-commands: []
+
+messages:
+  bossbar-title: "CombatLog: {time}s"
+  win: "Ты убил игрока {player}"
+  lose: "Тебя убил игрок {player}"
+  command-blocked: "Нельзя использовать команды во время CombatLog!"

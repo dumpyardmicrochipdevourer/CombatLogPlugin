@@ -51,7 +51,7 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
-                                    <include>com.antonk:combatlog-api</include>
+                                    <include>com.antonk:api</include>
                                 </includes>
                             </artifactSet>
                         </configuration>

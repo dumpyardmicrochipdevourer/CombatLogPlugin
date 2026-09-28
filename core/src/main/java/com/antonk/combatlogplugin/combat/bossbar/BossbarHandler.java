@@ -11,60 +11,71 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 public class BossbarHandler {
     private final Plugin plugin;
+    private final String titleFormat;
+    private final Consumer<Player> onExpire;
     private int countdown;
-    private final Map<Player, BossBar> activeBossBars = new HashMap<>();
-    private final Map<Player,BukkitTask> activeTasks = new HashMap<>();
+    private final Map<UUID, BossBar> activeBossBars = new HashMap<>();
+    private final Map<UUID, BukkitTask> activeTasks = new HashMap<>();
 
-
-    public BossbarHandler(Plugin plugin, int countdown) {
+    public BossbarHandler(Plugin plugin, int countdown, String titleFormat, Consumer<Player> onExpire) {
         this.plugin = plugin;
         this.countdown = countdown;
+        this.titleFormat = titleFormat;
+        this.onExpire = onExpire;
     }
 
     public void putCombatLog(Player p) {
-        if (activeBossBars.containsKey(p)) {
+        if (activeBossBars.containsKey(p.getUniqueId())) {
             resetTimer(p);
             return;
         }
         BossBar bossBar = Bukkit.createBossBar(
-                String.format("CombatLog: %s seconds",countdown),
+                formatTitle(countdown),
                 BarColor.RED,
                 BarStyle.SOLID
         );
 
         bossBar.addPlayer(p);
-        activeBossBars.put(p,bossBar);
-        startTimer(p,countdown);
+        activeBossBars.put(p.getUniqueId(), bossBar);
+        startTimer(p, countdown);
     }
 
     private void startTimer(Player p, int seconds) {
         BukkitTask task = new BukkitRunnable() {
-            int countdown = seconds;
+            int remaining = seconds;
 
             @Override
             public void run() {
-                BossBar bossBar = activeBossBars.get(p);
-                if (bossBar == null || countdown <= 0) {
-                    removeCombatLog(p);
+                BossBar bossBar = activeBossBars.get(p.getUniqueId());
+                if (bossBar == null) {
                     cancel();
                     return;
                 }
-                bossBar.setTitle("Combat: " + countdown + "s");
-                bossBar.setProgress(countdown / (double) seconds);
+                if (remaining <= 0) {
+                    removeCombatLog(p);
+                    onExpire.accept(p);
+                    return;
+                }
+                bossBar.setTitle(formatTitle(remaining));
+                bossBar.setProgress(remaining / (double) seconds);
 
-                if (countdown <= countdown/2) {
-                    bossBar.setColor(BarColor.YELLOW);
-                } else if (countdown <= 10) {
+                if (remaining <= 10) {
                     bossBar.setColor(BarColor.GREEN);
+                } else if (remaining <= seconds / 2) {
+                    bossBar.setColor(BarColor.YELLOW);
+                } else {
+                    bossBar.setColor(BarColor.RED);
                 }
 
-                countdown --;
-                }
-            }.runTaskTimer(plugin, 0L, 20L);
-        activeTasks.put(p, task);
+                remaining--;
+            }
+        }.runTaskTimer(plugin, 0L, 20L);
+        activeTasks.put(p.getUniqueId(), task);
     }
 
     public void setCountdown(int countdown) {
@@ -72,21 +83,32 @@ public class BossbarHandler {
     }
 
     public void resetTimer(Player p) {
-        BukkitTask task = activeTasks.get(p);
+        BukkitTask task = activeTasks.get(p.getUniqueId());
         if (task != null) {
             task.cancel();
         }
-        startTimer(p,countdown);
+        startTimer(p, countdown);
     }
 
     public void removeCombatLog(Player p) {
-        BossBar bossBar = activeBossBars.remove(p);
+        BossBar bossBar = activeBossBars.remove(p.getUniqueId());
         if (bossBar != null) {
             bossBar.removeAll();
         }
-        BukkitTask task = activeTasks.remove(p);
+        BukkitTask task = activeTasks.remove(p.getUniqueId());
         if (task != null) {
             task.cancel();
         }
+    }
+
+    public void removeAll() {
+        activeBossBars.values().forEach(BossBar::removeAll);
+        activeBossBars.clear();
+        activeTasks.values().forEach(BukkitTask::cancel);
+        activeTasks.clear();
+    }
+
+    private String formatTitle(int seconds) {
+        return titleFormat.replace("{time}", String.valueOf(seconds));
     }
 }

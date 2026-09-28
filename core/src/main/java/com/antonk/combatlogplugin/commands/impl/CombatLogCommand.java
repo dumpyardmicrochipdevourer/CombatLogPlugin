@@ -1,17 +1,24 @@
 package com.antonk.combatlogplugin.commands.impl;
 
-import com.antonk.combatlogplugin.combat.CombatManager;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.tree.LiteralCommandNode;
-import io.papermc.paper.command.brigadier.CommandSourceStack;
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
-import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
+import java.util.List;
+
 import org.bukkit.entity.Player;
 
+import com.antonk.combatlogplugin.combat.CombatManager;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+
+import io.papermc.paper.command.brigadier.CommandSourceStack;
 import static io.papermc.paper.command.brigadier.Commands.argument;
 import static io.papermc.paper.command.brigadier.Commands.literal;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 
 public class CombatLogCommand {
+    private static final String ADMIN_PERMISSION = "combatlog.admin";
+
     private final CombatManager combatManager;
 
     public CombatLogCommand(CombatManager combatManager) {
@@ -20,6 +27,7 @@ public class CombatLogCommand {
 
     public LiteralCommandNode<CommandSourceStack> createCommandNode() {
         LiteralArgumentBuilder<CommandSourceStack> root = literal("combatlog")
+                .requires(source -> source.getSender().hasPermission(ADMIN_PERMISSION))
                 .then(literal("test")
                         .executes(ctx -> {
                             CommandSourceStack source = ctx.getSource();
@@ -32,25 +40,26 @@ public class CombatLogCommand {
                 .then(literal("put")
                         .then(argument("player", ArgumentTypes.player())
                                 .executes(ctx -> {
-                                    Player target = ctx.getArgument("player", PlayerSelectorArgumentResolver.class)
-                                            .resolve(ctx.getSource())
-                                            .getFirst();
+                                    Player target = resolveTarget(ctx);
+                                    if (target == null) {
+                                        return 0;
+                                    }
                                     boolean success = combatManager.createDuel(target, target);
                                     if (success) {
                                         ctx.getSource().getSender().sendPlainMessage("CombatLogged " + target.getName());
                                     } else {
                                         ctx.getSource().getSender().sendPlainMessage(String.format("Ошибка! %s в креативе",target.getName()));
                                     }
-                                    combatManager.createDuel(target,target);
                                     return success ? 1 : 0;
                                 })
                         ))
                 .then(literal("remove")
                         .then(argument("player", ArgumentTypes.player())
                                 .executes(ctx -> {
-                                    Player target = ctx.getArgument("player", PlayerSelectorArgumentResolver.class)
-                                            .resolve(ctx.getSource())
-                                            .getFirst();
+                                    Player target = resolveTarget(ctx);
+                                    if (target == null) {
+                                        return 0;
+                                    }
                                     if (combatManager.isInCombat(target)) {
                                         combatManager.removeCombatLog(target);
                                         ctx.getSource().getSender().sendPlainMessage("CombatLog снят с " + target.getName());
@@ -60,5 +69,15 @@ public class CombatLogCommand {
                                 })
                         ));
         return root.build();
+    }
+
+    private Player resolveTarget(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        List<Player> players = ctx.getArgument("player", PlayerSelectorArgumentResolver.class)
+                .resolve(ctx.getSource());
+        if (players.isEmpty()) {
+            ctx.getSource().getSender().sendPlainMessage("Игрок не найден!");
+            return null;
+        }
+        return players.getFirst();
     }
 }

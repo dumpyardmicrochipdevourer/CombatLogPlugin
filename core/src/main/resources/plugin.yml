@@ -2,3 +2,10 @@ name: CombatLogPlugin
 version: '1.0-SNAPSHOT'
 main: com.antonk.combatlogplugin.CombatLogPlugin
 api-version: '1.21'
+permissions:
+  combatlog.admin:
+    description: Управление боем /combatlog
+    default: op
+  combatlog.bypass:
+    description: Команды в бою не блокируются
+    default: op
